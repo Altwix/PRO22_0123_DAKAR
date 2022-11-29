@@ -1,0 +1,4 @@
+# The base Ridgeback configuration has only the
+# front laser.
+
+ROADROLLER_GPS=1

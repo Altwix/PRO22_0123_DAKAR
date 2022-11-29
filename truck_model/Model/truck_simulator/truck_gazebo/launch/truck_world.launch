@@ -1,0 +1,43 @@
+<launch>
+
+  <arg name="use_sim_time" default="true" />
+  <arg name="gui" default="true" />
+  <arg name="headless" default="false" />
+  <arg name="world_name" default="$(find truck_gazebo)/worlds/quarry.world" /> 
+  <!-- <arg name="world_name" default="$(find truck_gazebo)/worlds/perception.world" /> -->
+  <!-- <arg name="world_name" default="$(find roadroller_gazebo)/worlds/road.world" /> -->
+  <!-- <arg name="world_name" default="$(find roadroller_gazebo)/worlds/road_under_construction.world" /> -->
+
+  <!-- GAZEBO with the specified world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="debug" value="0" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="use_sim_time" value="$(arg use_sim_time)" />
+    <arg name="headless" value="$(arg headless)" />
+    <arg name="world_name" value="$(arg world_name)" />
+    <arg name="paused" value="false"/>
+  </include>
+
+  <!-- VEHICLE MODELS FOR GAZEBO -->
+  <!-- <include file="$(find roadroller_gazebo)/launch/model_spawner.launch">
+    <arg name="namespace" value="roadroller"/>
+    <arg name="cmd_timeout" value="-1"/>
+    <arg name="init_pose" value="-x 0 -y 0 -z 0.7"/>
+    <arg name="config" value="$(optenv ROADROLLER_CONFIG full_configuration_roadroller)" />
+  </include>
+
+   <include file="$(find roadroller_gazebo)/launch/model_spawner.launch">
+    <arg name="namespace" value="roadroller_2"/>
+    <arg name="cmd_timeout" value="-1"/>
+    <arg name="init_pose" value="-x -8 -y 0 -z 0.7"/>
+    <arg name="config" value="$(optenv ROADROLLER_CONFIG full_configuration_roadroller_2)" />
+  </include>
+
+  <include file="$(find roadroller_gazebo)/launch/model_spawner.launch">
+    <arg name="namespace" value="paver"/>
+    <arg name="cmd_timeout" value="-1"/>
+    <arg name="init_pose" value="-x 15 -y 0 -z 0.0"/>
+    <arg name="config" value="$(optenv ROADROLLER_CONFIG full_configuration_paver)" />
+  </include> -->
+  
+</launch>

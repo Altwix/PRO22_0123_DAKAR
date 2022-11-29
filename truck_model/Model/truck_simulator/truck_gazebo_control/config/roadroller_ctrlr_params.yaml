@@ -1,0 +1,47 @@
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+rear_left_wheel:
+  link_name: rear_left_wheel_link
+  axle_controller_name: rear_left_axle_ctrlr
+  diameter: 1.338
+
+rear_inner_left_wheel:
+  link_name: rear_inner_left_wheel_link
+  axle_controller_name: rear_inner_left_axle_ctrlr
+  diameter: 1.338
+
+rear_inner_right_wheel:
+  link_name: rear_inner_right_wheel_link
+  axle_controller_name: rear_inner_right_axle_ctrlr
+  diameter: 1.338
+
+rear_right_wheel:
+  link_name: rear_right_wheel_link
+  axle_controller_name: rear_right_axle_ctrlr
+  diameter: 1.338
+
+front_left_wheel:
+  steering_link_name: front_left_steering_link
+  steering_controller_name: left_steering_ctrlr
+  link_name: front_left_wheel_link
+  axle_controller_name: front_left_axle_ctrlr
+  diameter: 1.338
+
+front_center_wheel:
+  steering_link_name: front_center_steering_link
+  steering_controller_name: center_steering_ctrlr
+  link_name: front_center_wheel_link
+  axle_controller_name: front_center_axle_ctrlr
+  diameter: 1.338
+
+front_right_wheel:
+  steering_link_name: front_right_steering_link
+  steering_controller_name: right_steering_ctrlr
+  link_name: front_right_wheel_link
+  axle_controller_name: front_right_axle_ctrlr
+  diameter: 1.338
+

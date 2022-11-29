@@ -1,0 +1,14 @@
+material simple_road/Diffuse
+{
+  receive_shadows off
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture road.jpg
+      }
+    }
+  }
+}

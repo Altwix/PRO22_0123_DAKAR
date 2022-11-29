@@ -1,0 +1,18 @@
+<launch>
+
+  <!-- VEHICLE MODELS FOR GAZEBO -->
+  <include file="$(find roadroller_gazebo)/launch/model_spawner.launch">
+    <arg name="namespace" value="roadroller"/>
+    <arg name="cmd_timeout" value="-1"/>
+    <arg name="init_pose" value="-x 0 -y 0 -z 0.7"/>
+    <arg name="config" value="$(optenv ROADROLLER_CONFIG full_configuration)" />
+  </include>
+
+  <include file="$(find roadroller_gazebo)/launch/model_spawner.launch">
+    <arg name="namespace" value="paver"/>
+    <arg name="cmd_timeout" value="-1"/>
+    <arg name="init_pose" value="-x 15 -y 0 -z 0.7"/>
+    <arg name="config" value="$(optenv ROADROLLER_CONFIG full_configuration_paver)" />
+  </include>
+  
+</launch>

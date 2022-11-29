@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<robot>
+  <gazebo>
+    <!-- <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/</robotNamespace>
+    </plugin> -->
+    <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control">
+      <!-- <robotNamespace>/</robotNamespace> -->
+      <controlPeriod>0.0025</controlPeriod>
+	    <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+    </plugin>
+
+   <!-- <plugin name="imu_controller" filename="libhector_gazebo_ros_imu.so">
+      <robotNamespace>/</robotNamespace>
+      <updateRate>50.0</updateRate>
+      <bodyName>imu_link</bodyName>
+      <topicName>imu/data</topicName>
+      <accelDrift>0.005 0.005 0.005</accelDrift>
+      <accelGaussianNoise>0.005 0.005 0.005</accelGaussianNoise>
+      <rateDrift>0.00005 0.00005 0.00005</rateDrift>
+      <rateGaussianNoise>0.00005 0.00005 0.00005</rateGaussianNoise>
+      <headingDrift>0.005</headingDrift>
+      <headingGaussianNoise>0.005</headingGaussianNoise>
+    </plugin> -->
+  </gazebo>
+
+<!--   <gazebo>
+    <plugin name="ros_imu_base_link" filename="libgazebo_ros_imu.so">
+       <topicName>imu/data</topicName>
+		<bodyName>imu_link </bodyName>
+      <updateRate>50.0</updateRate>
+		<serviceName>/imu_link_service</serviceName>
+        <gaussianNoise>0.05</gaussianNoise>		
+    </plugin>
+  </gazebo> -->
+
+  <!-- All static links get collapsed down to base_link in Gazebo, so that's
+       the one to apply the colour to (in Gazebo 5+). -->
+  <gazebo reference="base_link">
+    <material>Gazebo/White</material>
+    <gravity>true</gravity>
+  </gazebo>
+  
+  <!-- Wheel friction to zero, as movement is handled by applying forces at
+       the body level. -->
+ <!--  <gazebo reference="front_left_wheel_link">
+    <material>Gazebo/DarkGrey</material>
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+  </gazebo>
+
+  <gazebo reference="front_right_wheel_link">
+    <material>Gazebo/DarkGrey</material>
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+  </gazebo>
+
+  <gazebo reference="rear_left_wheel_link">
+    <material>Gazebo/DarkGrey</material>
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+  </gazebo>
+
+  <gazebo reference="rear_right_wheel_link">
+    <material>Gazebo/DarkGrey</material>
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+  </gazebo> -->
+
+  <!-- This is an wheel-level solution to possibly revisit at a future date. -->
+  <!--<gazebo>
+    <plugin name="mecanum_gazebo" filename="libmecanum_force_plugin.so">
+      <wheelJointName>front_left_wheel</wheelJointName>
+      <forceScaleFactor>1</forceScaleFactor>
+    </plugin>
+    <plugin name="mecanum_gazebo" filename="libmecanum_force_plugin.so">
+      <wheelJointName>front_right_wheel</wheelJointName>
+      <forceScaleFactor>-1</forceScaleFactor>
+    </plugin>
+    <plugin name="mecanum_gazebo" filename="libmecanum_force_plugin.so">
+      <wheelJointName>rear_left_wheel</wheelJointName>
+      <forceScaleFactor>-1</forceScaleFactor>
+    </plugin>
+    <plugin name="mecanum_gazebo" filename="libmecanum_force_plugin.so">
+      <wheelJointName>rear_right_wheel</wheelJointName>
+      <forceScaleFactor>1</forceScaleFactor>
+    </plugin>
+  </gazebo> -->
+</robot>

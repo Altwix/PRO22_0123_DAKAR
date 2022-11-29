@@ -1,0 +1,36 @@
+<launch>
+  <arg name="use_sim_time" default="true" />
+  <arg name="cmd_timeout" default="-1"/>
+  
+  <!-- Configuration of roadroller which you would like to simulate.
+       See roadroller_description for details. -->
+  <arg name="config" default="$(optenv TRUCK_CONFIG empty)" />
+  <!-- <arg name="config" default="$(optenv TRUCK_CONFIG two_lidars_outdoor_localization)" /> -->
+  <!-- <arg name="config" default="$(optenv TRUCK_CONFIG top_velodyne_hdl_32)" /> -->
+  <!-- <arg name="config" default="$(optenv TRUCK_CONFIG top_velodyne_vlp_16)" /> -->
+  <!-- <arg name="config" default="$(optenv TRUCK_CONFIG dual_sick_lasers_top_velodyne_hdl_32)" /> -->
+
+  <!-- Load roadroller's description, controllers, and teleop nodes. -->
+  <include file="$(find truck_description)/launch/description.launch">
+    <arg name="config" value="$(arg config)" />
+  </include>
+  <!-- <include file="$(find truck_gazebo_control)/launch/control.launch" /> -->
+  <!-- <include file="$(find ridgeback_control)/launch/teleop.launch"> 
+    <arg name="joystick" value="false"/>
+  </include> -->
+
+  <!-- Control the steering, axle, and shock absorber joints. -->
+    <!-- <node name="roadroller_controller" pkg="roadroller_gazebo_control"
+          type="roadroller_controller.py" output="screen">
+      <param name="cmd_timeout" value="$(arg cmd_timeout)"/>
+      <rosparam file="$(find roadroller_gazebo_control)/config/roadroller_ctrlr_params.yaml" command="load"/>
+    </node>  -->
+
+  <!-- Spawn Roadroller -->
+  <!--node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
+        args="-urdf -model roadroller -param robot_description -x 0 -y 0 -z 0.67" /--> 
+  
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
+        args="-urdf -model truck -param robot_description -x 20 -y 0 -z 0.4 -Y 1.57" /> 
+
+</launch>

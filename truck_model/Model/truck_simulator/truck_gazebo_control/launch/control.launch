@@ -1,0 +1,28 @@
+<launch>
+
+  <arg name="namespace" default="roadroller..."/>
+
+  <rosparam command="load" file="$(find roadroller_gazebo_control)/config/control.yaml" />
+
+  <group if="$(optenv ROADROLLER_CONTROL_EXTRAS 0)" >
+    <rosparam command="load" file="$(env ROADROLLER_CONTROL_EXTRAS_PATH)" />
+  </group>
+
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" output="screen" 
+        args="/$(arg namespace)/roadroller_joint_publisher /$(arg namespace)/left_steering_ctrlr /$(arg namespace)/center_steering_ctrlr
+              /$(arg namespace)/right_steering_ctrlr 
+              /$(arg namespace)/front_left_axle_ctrlr /$(arg namespace)/front_center_axle_ctrlr /$(arg namespace)/front_right_axle_ctrlr
+              /$(arg namespace)/rear_left_axle_ctrlr /$(arg namespace)/rear_right_axle_ctrlr /$(arg namespace)/rear_inner_left_axle_ctrlr 
+              /$(arg namespace)/rear_inner_right_axle_ctrlr"/>
+         <!-- args="- -namespace /$(arg namespace)/ roadroller_joint_publisher left_steering_ctrlr center_steering_ctrlr
+         right_steering_ctrlr front_left_axle_ctrlr front_center_axle_ctrlr front_right_axle_ctrlr
+          rear_left_axle_ctrlr rear_right_axle_ctrlr rear_inner_left_axle_ctrlr rear_inner_right_axle_ctrlr
+          rear_left_shock_ctrlr rear_inner_left_shock_ctrlr rear_inner_right_shock_ctrlr rear_right_shock_ctrlr
+          front_left_shock_ctrlr front_center_shock_ctrlr front_right_shock_ctrlr"/-->
+          
+</launch>
+
+<!--
+              /$(arg namespace)/rear_left_shock_ctrlr /$(arg namespace)/rear_inner_left_shock_ctrlr /$(arg namespace)/rear_inner_right_shock_ctrlr 
+              /$(arg namespace)/rear_right_shock_ctrlr /$(arg namespace)/front_left_shock_ctrlr /$(arg namespace)/front_center_shock_ctrlr 
+              /$(arg namespace)/front_right_shock_ctrlr-->

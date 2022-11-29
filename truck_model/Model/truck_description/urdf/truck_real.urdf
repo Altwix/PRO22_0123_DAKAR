@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<robot name="truck" xmlns:xacro="http://www.ros.org/wiki/xacro"> 
+
+<xacro:property name="PI" value="3.1415926535897931" />
+<xacro:property name="dummy_inertia" value="1e-09"/>
+  <xacro:property name="vehicle_Ixx_inertia" value="8484.375"/>
+  <xacro:property name="vehicle_Iyy_inertia" value="53384.286158"/> 
+  <xacro:property name="vehicle_Izz_inertia" value="61868.661158"/>
+
+<!-- Bring in simulation data for Gazebo. -->
+  <xacro:include filename="$(find truck_description)/urdf/truck.gazebo" />
+
+
+    <link name="dummy"/>
+
+    <link name="base_link">
+      <visual>
+       <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+        <geometry>
+          <mesh filename="package://truck_description/meshes/truck_simplify.stl" scale="0.01 0.01 0.01"/> 
+       </geometry>
+     </visual>
+     <collision>
+       <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+        <geometry>
+          <mesh filename="package://truck_description/meshes/truck_simplify.stl" scale="0.01 0.01 0.01"/> 
+       </geometry>
+     </collision>
+     <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="2"/>
+       <inertia
+          ixx="${vehicle_Ixx_inertia}" ixy="0" ixz="0"
+          iyy="${vehicle_Iyy_inertia}" iyz="0"
+          izz="${vehicle_Izz_inertia}"/>
+        </inertial>  
+    </link>
+
+    
+     <joint name="dummy_joint" type="fixed"> 
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="dummy"/>
+        <child link="base_link"/>
+    </joint>
+ 
+  <!-- IMU SENSOR -->
+    <!-- <joint name="imu_joint" type="fixed"> 
+        <origin xyz="0 0 3.14" rpy="0 0 0"/>
+        <parent link="base_link"/>
+        <child link="imu_mount"/>
+    </joint>
+
+    <link name="imu_mount"/> -->
+
+  <!-- GPS SENSOR -->
+    <!-- <joint name="gps_joint" type="fixed">
+        <origin xyz="0.2 0 3.14" rpy="0 0 0"/>
+        <parent link="base_link" />
+        <child link="gps_link" />
+    </joint>
+
+    <link name="gps_link"/> -->
+
+  <!-- Front bpearl SENSOR --> <!--x = distancia entre ejes 3.993 + voladizo exterior 0.645 + longitud soporte 0.23-->
+    <!-- <joint name="front_bpearl_joint" type="fixed">
+        <origin xyz="4.868 -1.05 2.355" rpy="${PI} 0 0" />
+        <parent link="base_link" />
+        <child link="front_bpearl" />
+    </joint>
+
+    <link name="front_bpearl"/> -->
+
+    <!-- OUSTER SO1 --> <!--x = voladizo exterior trasero 0.79 + longitud soporte 0.23-->
+   <!--  <joint name="right_ouster_joint" type="fixed">
+        <origin xyz="-6.6 5.45 9.775" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="right_ouster" />
+    </joint>
+
+    <link name="right_ouster"/>  -->
+  <xacro:include filename="$(find ouster_description)/urdf/Ouster_SO1.urdf.xacro"/>
+  
+  <xacro:Ouster_SO1 parent="base_link" name="ouster_so1_right" topic="ouster_so1_right_points" organize_cloud="false" hz="10" samples="1024" lasers="32" gpu="false" >
+    <origin xyz="-0.66 -1.04 0.545 " rpy="0 0 ${-PI/2}" />
+  </xacro:Ouster_SO1> 
+
+    <xacro:Ouster_SO1 parent="base_link" name="ouster_so1_left" topic="ouster_so1_left_points" organize_cloud="false" hz="10" samples="1024" lasers="32" gpu="false" >
+    <origin xyz="0.66 -1.04 0.545 " rpy="0 0 ${-PI/2}" />
+  </xacro:Ouster_SO1> 
+
+
+</robot>
+ 

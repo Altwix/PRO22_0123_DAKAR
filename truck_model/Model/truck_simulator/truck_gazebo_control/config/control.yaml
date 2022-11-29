@@ -1,0 +1,103 @@
+roadroller_joint_publisher:
+  type: "joint_state_controller/JointStateController"
+  publish_rate: 50
+
+## Steering ##
+
+left_steering_ctrlr:
+  joint: front_left_steering_joint
+  type: effort_controllers/JointPositionController
+  pid: {p: 10000.0, i: 100.0, d: 2000.0}
+#  pid: {p: 250.0, i: 150.0, d: 100.0}
+
+right_steering_ctrlr:
+  joint: front_right_steering_joint
+  type: effort_controllers/JointPositionController
+  pid: {p: 10000.0, i: 100.0, d: 2000.0}
+
+center_steering_ctrlr:
+  joint: front_center_steering_joint
+  type: effort_controllers/JointPositionController
+  pid: {p: 10000.0, i: 100.0, d: 2000.0}
+
+## Axle controllers ##
+
+front_left_axle_ctrlr:
+  joint: front_left_wheel
+  type: effort_controllers/JointVelocityController
+  pid: {p: 2000.0, i: 50.0, d: 5.0, i_clamp: 500.0, antiwindup: True}
+
+front_center_axle_ctrlr:
+  joint: front_center_wheel
+  type: effort_controllers/JointVelocityController
+  pid: {p: 2000.0, i: 50.0, d: 5.0, i_clamp: 500.0, antiwindup: True}
+
+front_right_axle_ctrlr:
+  joint: front_right_wheel
+  type: effort_controllers/JointVelocityController
+  pid: {p: 2000.0, i: 50.0, d: 5.0, i_clamp: 500.0, antiwindup: True}
+
+rear_left_axle_ctrlr:
+  joint: rear_left_wheel
+  type: effort_controllers/JointVelocityController
+  pid: {p: 2000.0, i: 50.0, d: 5.0, i_clamp: 500.0, antiwindup: True}
+
+rear_inner_left_axle_ctrlr:
+  joint: rear_inner_left_wheel
+  type: effort_controllers/JointVelocityController
+  pid: {p: 2000.0, i: 50.0, d: 5.0, i_clamp: 500.0, antiwindup: True}
+
+rear_right_axle_ctrlr:
+  joint: rear_right_wheel
+  type: effort_controllers/JointVelocityController
+  pid: {p: 2000.0, i: 50.0, d: 5.0, i_clamp: 500.0, antiwindup: True}
+
+rear_inner_right_axle_ctrlr:
+  joint: rear_inner_right_wheel
+  type: effort_controllers/JointVelocityController
+  pid: {p: 2000.0, i: 50.0, d: 5.0, i_clamp: 500.0, antiwindup: True}
+  antiwindup: true
+
+########### Shockers ##########
+
+### Rear shockers
+
+rear_left_shock_ctrlr:
+  joint: rear_left_shock
+  type: effort_controllers/JointPositionController
+  # pid: {p: 100000.0, i: 50000.0, d: 10000.0, i_clamp: 50000.0}
+  pid: {p: 100.0, i: 0.0, d: 0.0, i_clamp: 0.0}
+
+rear_inner_left_shock_ctrlr:
+  joint: rear_inner_left_shock
+  type: effort_controllers/JointPositionController
+  pid: {p: 100.0, i: 0.0, d: 0.0, i_clamp: 0.0}
+
+rear_right_shock_ctrlr:
+  joint: rear_right_shock
+  type: effort_controllers/JointPositionController
+  pid: {p: 100.0, i: 0.0, d: 0.0, i_clamp: 0.0}
+
+rear_inner_right_shock_ctrlr:
+  joint: rear_inner_right_shock
+  type: effort_controllers/JointPositionController
+  pid: {p: 100.0, i: 0.0, d: 0.0, i_clamp: 0.0}
+
+## Front shockers
+
+front_left_shock_ctrlr:
+  joint: front_left_shock
+  type: effort_controllers/JointPositionController
+  pid: {p: 100.0, i: 0.0, d: 0.0, i_clamp: 0.0}
+
+front_center_shock_ctrlr:
+  joint: front_center_shock
+  type: effort_controllers/JointPositionController
+  pid: {p: 100.0, i: 0.0, d: 0.0, i_clamp: 0.0}
+
+front_right_shock_ctrlr:
+  joint: front_right_shock
+  type: effort_controllers/JointPositionController
+  pid: {p: 100.0, i: 0.0, d: 0.0, i_clamp: 0.0}
+
+#pid: {p: 100000.0, i: 500.0, d: 100.0, i_clamp: 0.0}

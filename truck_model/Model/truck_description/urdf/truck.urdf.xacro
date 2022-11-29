@@ -1,0 +1,468 @@
+<?xml version="1.0"?>
+<robot name="truck" xmlns:xacro="http://www.ros.org/wiki/xacro"> 
+<!-- Constants for robot dimensions -->
+ <xacro:property name="PI" value="3.1415926535897931" />
+
+<!-- Variable values for XXXXXX-->
+  <xacro:property name="rear_axle_width" value="2.482" />
+  <xacro:property name="front_axle_width" value="2.506" />
+  <xacro:property name="truck_width" value="2.5" />
+  <xacro:property name="truck_length" value="6.271" />
+  <xacro:property name="front_overhang" value="0.845" /> <!-- distance between front axle and front part of the vehicle-->
+  <xacro:property name="rear_overhang" value="0.961" /> <!-- distance between rear axle and rear part of the vehicle-->
+  <xacro:property name="distance_base_link_front_axle" value="5.55" />
+  <xacro:property name="distance_base_link_front_middle_axle" value="3.85" />
+  <xacro:property name="distance_base_link_rear_middle_axle" value="1.35" />
+  <xacro:property name="distance_base_link_rear_axle" value="0.0" />
+
+  <xacro:property name="imu_offset_x" value="0.2085" />
+  <xacro:property name="imu_offset_y" value="-0.2902" />
+  <xacro:property name="imu_offset_z" value="0.1681" />
+
+  <xacro:property name="dummy_inertia" value="1e-09"/>
+  <xacro:property name="wheel_mass" value="60"/> <!--100-->
+  <xacro:property name="wheel_Ixx_inertia" value="12.631158"/> 
+  <xacro:property name="wheel_Iyy_inertia" value="22.37805"/> <!-- y es el eje de giro de la rueda -->
+  <xacro:property name="wheel_Izz_inertia" value="12.631158"/> 
+  <xacro:property name="wheel_radius" value="0.5713" />
+  <xacro:property name="wheel_width" value="0.385" />
+  
+  <xacro:property name="load_mass" value="1500.0"/> <!-- 16290 -->
+  <xacro:property name="cabin_mass" value="2000.0"/> <!-- 16290 -->
+  <xacro:property name="vehicle_Ixx_inertia" value="8484.375"/>
+  <xacro:property name="vehicle_Iyy_inertia" value="53384.286158"/> 
+  <xacro:property name="vehicle_Izz_inertia" value="61868.661158"/>
+
+  <xacro:property name="wheel_mu1" value="200.0"/>
+  <xacro:property name="wheel_mu2" value="100.0"/>
+
+  <xacro:property name="steering_damping" value="0"/>
+
+  <xacro:property name="axle_damping" value="0"/>
+  <xacro:property name="axle_friction" value="200"/>
+  <xacro:property name="axle_effort" value="15000"/>
+  <xacro:property name="spring_stiffness" value="9000.0"/> <!--90000.0-->
+  <xacro:property name="spring_reference" value="0.0"/>
+
+  <xacro:property name="shock_damping" value="100.0"/>
+  <xacro:property name="shock_friction" value="100.0"/>
+  <xacro:property name="shock_travel" value="0.5"/>
+  <xacro:property name="shock_velocity" value="10.0"/>
+  <xacro:property name="shock_effort" value="5000.0"/>
+
+<!-- Bring in simulation data for Gazebo. -->
+  <xacro:include filename="$(find truck_description)/urdf/truck.gazebo" />
+
+<!-- Optional standard accessories, including their simulation data. The rendering
+       of these into the final description is controlled by optenv variables, which
+       default each one to off.-->
+  <!-- <xacro:include filename="$(find truck_description)/urdf/accessories.urdf.xacro" /> -->
+
+<!-- +++++++++++++++++++++++++++++++++++++ Macros ++++++++++++++++++++++++++++++++++++++++ -->
+<!-- WHEEL -->
+<xacro:macro name="wheel" params="prefix side *joint_pose">
+    <link name="${prefix}_${side}_wheel_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+        <geometry>
+          <!-- <mesh filename="package://truck_description/meshes/wheel.stl"/> -->
+           <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="${wheel_mass}"/>
+        <inertia
+          ixx="${wheel_Ixx_inertia}" ixy="0" ixz="0"
+          iyy="${wheel_Iyy_inertia}" iyz="0"
+          izz="${wheel_Izz_inertia}"/>        
+      </inertial>
+      <gazebo reference="${prefix}_${side}_wheel_link">
+        <mu1 value="200.0"/>
+        <mu2 value="100.0"/>
+      </gazebo>
+    </link>
+
+    <link name="${prefix}_${side}_axle_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="10"/>
+        <inertia
+          ixx="1.0" ixy="0" ixz="0"
+          iyy="1.0" iyz="0"
+          izz="1.0"/>
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_${side}_shock" type="fixed"> <!-- prismatic-->
+      <parent link="${prefix}_rocker_link"/>
+      <child link="${prefix}_${side}_axle_link" />
+      <xacro:insert_block name="joint_pose" />
+      <axis xyz="0 0 -1" />
+      <!-- <limit effort="${shock_effort}" lower="-${shock_travel/2}" upper="${shock_travel/2}" velocity="${shock_velocity}"/>
+      <dynamics damping="${shock_damping}"  friction="${shock_friction}" />      -->
+    </joint>
+  <!-- <gazebo reference="${prefix}_${side}_shock">  
+    <springStiffness>${spring_stiffness}</springStiffness>
+    <springReference>${spring_reference}</springReference>
+  </gazebo> -->
+<!-- 
+    <transmission name="${prefix}_shock_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${prefix}_${side}_shock">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface> -->
+        <!-- <hardwareInterface>VelocityJointInterface</hardwareInterface> -->
+      <!-- </joint>
+      <actuator name="${prefix}_${side}_shock_actuator">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission> -->
+
+    <joint name="${prefix}_${side}_wheel" type="continuous">
+      <parent link="${prefix}_${side}_axle_link"/>
+      <child link="${prefix}_${side}_wheel_link" />      
+      <axis xyz="0 1 0" />
+      <limit effort="${axle_effort}" velocity="10.0"/>
+      <dynamics damping="${axle_damping}" friction="${axle_friction}"/>
+    </joint>
+
+    <transmission name="${prefix}_wheel_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${prefix}_${side}_wheel">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <!-- <hardwareInterface>VelocityJointInterface</hardwareInterface> -->
+      </joint>
+      <actuator name="${prefix}_${side}_actuator">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <gazebo reference="${prefix}_${side}_wheel_link">
+      <mu1 value="${wheel_mu1}"/>
+      <mu1 value="${wheel_mu2}"/>
+      <material>Gazebo/DarkGrey</material>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- STEERING WHEEL -->
+<xacro:macro name="steering_wheel" params="prefix side *joint_pose">
+    <link name="${prefix}_${side}_wheel_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+       <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+          <!-- <mesh filename="package://truck_description/meshes/wheel.stl"/> -->
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="${wheel_mass}"/>
+        <inertia
+          ixx="${wheel_Ixx_inertia}" ixy="0" ixz="0"
+          iyy="${wheel_Iyy_inertia}" iyz="0"
+          izz="${wheel_Izz_inertia}"/>
+      </inertial>
+      <gazebo reference="${prefix}_${side}_wheel_link">
+        <mu1 value="200.0"/>
+        <mu2 value="100.0"/>
+      </gazebo>
+    </link>
+
+    <joint name="${prefix}_${side}_wheel" type="continuous">
+      <parent link="${prefix}_${side}_steering_link"/>
+      <child link="${prefix}_${side}_wheel_link" />
+      <limit effort="${axle_effort}" velocity="10.0"/>
+      <axis xyz="0 1 0" />
+      <dynamics damping="${axle_damping}" friction="${axle_friction}"/>
+    </joint>
+
+    <transmission name="${prefix}_${side}_wheel_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${prefix}_${side}_wheel">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${prefix}_${side}_actuator">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+<link name="${prefix}_${side}_axle_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="10"/>
+        <inertia
+          ixx="1.0" ixy="0" ixz="0"
+          iyy="1.0" iyz="0"
+          izz="1.0"/>
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_${side}_shock" type="fixed"> <!--prismatic -->
+      <parent link="${prefix}_rocker_link"/>
+      <child link="${prefix}_${side}_axle_link" />
+      <xacro:insert_block name="joint_pose" />
+      <axis xyz="0 0 -1" />
+      <!-- <limit effort="${shock_effort}" lower="-${shock_travel/2}" upper="${shock_travel/2}" velocity="${shock_velocity}"/>
+      <dynamics damping="${shock_damping}"  friction="${shock_friction}" />      -->
+    </joint>
+    <!-- <gazebo reference="${prefix}_${side}_shock">  
+      <springStiffness>${spring_stiffness}</springStiffness>
+      <springReference>${spring_reference}</springReference>
+    </gazebo> -->
+
+    <!-- <transmission name="${prefix}_shock_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${prefix}_${side}_shock">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface> -->
+        <!-- <hardwareInterface>VelocityJointInterface</hardwareInterface> -->
+      <!--</joint>
+      <actuator name="${prefix}_${side}_shock_actuator">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission> -->
+
+<link name="${prefix}_${side}_steering_link">
+   <inertial>
+     <mass value="1.0"/>
+     <inertia ixx="10" ixy="0" ixz="0" iyy="100" iyz="0" izz="1"/>
+   </inertial>
+  </link> 
+
+  <joint name="${prefix}_${side}_steering_joint" type="revolute">
+    <parent link="${prefix}_${side}_axle_link"/>
+    <child link="${prefix}_${side}_steering_link"/>
+    <axis xyz="0 0 1"/>
+    <!-- <xacro:insert_block name="joint_pose" /> -->
+    <limit effort="50000.0" lower="-0.61" upper="0.61" velocity="1.0"/>
+    <dynamics damping="${steering_damping}"/>
+  </joint>
+
+  <transmission name="${prefix}_${side}_steering_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="${prefix}_${side}_steering_joint">
+	<hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>	
+    </joint>
+    <actuator name="${prefix}_${side}_steering_act">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+    <gazebo reference="${prefix}_${side}_wheel_link">
+      <mu1 value="${wheel_mu1}"/>
+      <mu1 value="${wheel_mu2}"/>
+      <material>Gazebo/DarkGrey</material>
+    </gazebo>
+  </xacro:macro>
+
+<!-- +++++++++++++++++++++++++++++++++++++ End Macros ++++++++++++++++++++++++++++++++++++++++ -->
+
+<!-- <link name="base_footprint">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+       <geometry>
+          <cylinder radius="10" length="0.1"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="10" length="0.1"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="100000"/>
+        <inertia
+          ixx="100" ixy="0" ixz="0"
+          iyy="100" iyz="0"
+          izz="100"/>
+      
+      </inertial>
+    </link>
+
+<joint name="base_footprint_base_link_joint" type="fixed">
+    <origin xyz="0 0 -${wheel_radius}" rpy="0 0 0" />
+    <parent link="base_link"/>
+    <child link="base_footprint" />
+  </joint> -->
+
+<link name="base_link">  
+  <!-- <collision>
+    <origin xyz="${distance_between_axles/2} 0 ${wheel_radius}" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://truck_description/meshes/chasis_collision.stl"/>
+      </geometry>
+  </collision> -->
+  <inertial>
+      <origin xyz="${distance_base_link_front_axle/2} 0 ${wheel_radius}" rpy="0 0 0"/>
+      <mass value="${load_mass}"/>
+      <inertia
+            ixx="${vehicle_Ixx_inertia}" ixy="0" ixz="0"
+            iyy="${vehicle_Iyy_inertia}" iyz="0"
+            izz="${vehicle_Izz_inertia}"/>
+    </inertial>  
+</link>
+
+<joint name="base_link_rear_rocker_joint" type="fixed">
+  <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0" />
+  <parent link="base_link"/>
+  <child link="rear_rocker_link" />
+</joint>
+
+<link name="rear_rocker_link">
+  <visual>
+    <origin xyz="1.5 0 0.1" rpy="0 0 0"/>
+      <geometry>
+        <!-- <mesh filename="package://truck_description/meshes/chasis_collision.stl"/> -->
+        <box size="3.85 1.5 0.2"/>
+      </geometry>
+  </visual>
+  <inertial>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <mass value="1"/>
+    <inertia
+          ixx="${dummy_inertia}" ixy="0" ixz="0"
+          iyy="${dummy_inertia}" iyz="0"
+          izz="${dummy_inertia}"/>
+    <!-- <inertia
+          ixx="0.0288" ixy="2.20484e-6" ixz="-1.3145e-5"
+          iyy="0.4324" iyz="1.8944e-3"
+          izz="0.4130"/> -->
+  </inertial>
+</link>
+
+<joint name="base_link_rear_middle_rocker_joint" type="fixed">
+  <origin xyz="${distance_base_link_rear_middle_axle} 0 ${wheel_radius}" rpy="0 0 0" />
+  <parent link="base_link"/>
+  <child link="rear_middle_rocker_link" />
+</joint>
+
+<link name="rear_middle_rocker_link">
+  <inertial>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <mass value="1"/>
+    <inertia
+          ixx="${dummy_inertia}" ixy="0" ixz="0"
+          iyy="${dummy_inertia}" iyz="0"
+          izz="${dummy_inertia}"/>
+    <!-- <inertia
+          ixx="0.0288" ixy="2.20484e-6" ixz="-1.3145e-5"
+          iyy="0.4324" iyz="1.8944e-3"
+          izz="0.4130"/> -->
+  </inertial>
+</link>
+
+<joint name="base_link_front_middle_rocker_joint" type="fixed">
+  <origin xyz="${distance_base_link_front_middle_axle} 0 ${wheel_radius}" rpy="0 0 0" />
+  <parent link="base_link"/>
+  <child link="front_middle_rocker_link" />
+</joint>
+
+<link name="front_middle_rocker_link">
+  <inertial>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <mass value="1"/>
+    <inertia
+          ixx="${dummy_inertia}" ixy="0" ixz="0"
+          iyy="${dummy_inertia}" iyz="0"
+          izz="${dummy_inertia}"/>
+    <!-- <inertia
+          ixx="0.0288" ixy="2.20484e-6" ixz="-1.3145e-5"
+          iyy="0.4324" iyz="1.8944e-3"
+          izz="0.4130"/> -->
+  </inertial>
+</link>
+
+<joint name="base_link_front_rocker_joint" type="fixed">
+    <origin xyz="${distance_base_link_front_axle} 0 ${wheel_radius}" rpy="0 0 0" />
+    <parent link="base_link"/>
+    <child link="front_rocker_link" />
+  </joint>
+
+<link name="front_rocker_link">
+  <visual>
+    <origin xyz="-0.865 0 1.7" rpy="0 0 0"/>
+      <geometry>
+        <!-- <mesh filename="package://truck_description/meshes/chasis_collision.stl"/> -->
+        <box size="1.9 2.5 2.2"/>
+      </geometry>
+  </visual>
+  <inertial>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <mass value="${cabin_mass}"/>
+    <inertia
+          ixx="${vehicle_Ixx_inertia}" ixy="0" ixz="0"
+          iyy="${vehicle_Iyy_inertia}" iyz="0"
+          izz="${vehicle_Izz_inertia}"/>
+    <!-- <inertia
+          ixx="0.0288" ixy="2.20484e-6" ixz="-1.3145e-5"
+          iyy="0.4324" iyz="1.8944e-3"
+          izz="0.4130"/> -->
+  </inertial>
+</link>
+
+<xacro:wheel prefix="rear" side="left">
+      <origin xyz="0 ${rear_axle_width/2 - wheel_width/2} 0" rpy="0 0 0" />
+</xacro:wheel>
+<xacro:wheel prefix="rear" side="right">
+      <origin xyz="0 ${-(rear_axle_width/2 - wheel_width/2)} 0" rpy="0 0 0" />
+</xacro:wheel>
+<xacro:wheel prefix="rear_middle" side="left">
+      <origin xyz="0 ${rear_axle_width/2 - wheel_width/2} 0" rpy="0 0 0" />
+</xacro:wheel>
+<xacro:wheel prefix="rear_middle" side="right">
+      <origin xyz="0 ${-(rear_axle_width/2 - wheel_width/2)} 0" rpy="0 0 0" />
+</xacro:wheel>
+<xacro:steering_wheel prefix="front_middle" side="left">
+      <origin xyz="0 ${front_axle_width/2 - wheel_width/2} 0" rpy="0 0 0" />
+</xacro:steering_wheel>
+<xacro:steering_wheel prefix="front_middle" side="right">
+      <origin xyz="0 ${-(front_axle_width/2 - wheel_width/2)} 0" rpy="0 0 0" />
+</xacro:steering_wheel>
+<xacro:steering_wheel prefix="front" side="left">
+      <origin xyz="0 ${front_axle_width/2 - wheel_width/2} 0" rpy="0 0 0" />
+</xacro:steering_wheel>
+<xacro:steering_wheel prefix="front" side="right">
+      <origin xyz="0 ${-(front_axle_width/2 - wheel_width/2)} 0" rpy="0 0 0" />
+</xacro:steering_wheel>
+
+<!--|||||||||||||||||||||||||||||||||||| SENSORES |||||||||||||||||||||||||||||||||||||||||||||||||| -->
+<!--|||||||||||||||||||||||||||||||||||| SENSORES |||||||||||||||||||||||||||||||||||||||||||||||||| -->
+<!--|||||||||||||||||||||||||||||||||||| SENSORES |||||||||||||||||||||||||||||||||||||||||||||||||| -->
+ 
+  <!-- IMU SENSOR -->
+  <joint name="imu_joint" type="fixed"> 
+      <!-- <origin xyz="${distance_between_axles/2} 0 ${wheel_radius}" rpy="0 0 0"/> -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="base_link"/>
+      <child link="imu_mount"/>
+  </joint>
+
+  <link name="imu_mount">
+      <inertial>
+        <mass value="0.001"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+      </inertial>
+
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <box size="0.1 0.1 0.05"/>
+        </geometry>
+      </visual>
+  </link>
+
+</robot>

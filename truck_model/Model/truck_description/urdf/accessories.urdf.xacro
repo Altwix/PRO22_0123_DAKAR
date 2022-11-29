@@ -1,0 +1,270 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <!--
+    As you add to this URDF, please be aware that both the robot and
+    simulation include it. You must retain compatibility with all of
+    the following launch files:
+
+    ridgeback_viz/launch/view_model.launch
+    ridgeback_gazebo/launch/ridgeback_world.launch
+    ridgeback_base/launch/base.launch
+  -->
+
+  <xacro:include filename="$(find truck_description)/urdf/accessories/sick_lms1xx_mount.urdf.xacro" />
+  <!-- <xacro:include filename="$(find roadroller_description)/urdf/accessories/velodyne_hdl_32_mount.urdf.xacro" /> -->
+  <xacro:include filename="$(find velodyne_description)/urdf/HDL-32E.urdf.xacro" />
+  <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro" />
+
+  <xacro:include filename="$(find lidar_description)/urdf/RS_Bpearl.urdf.xacro" />
+
+  <!-- If enabled, generate the front SICK LMS111 LASER payload. -->
+  <xacro:if value="$(optenv ROADROLLER_FRONT_SICK_LASER 0)">
+    <xacro:sick_lms1xx_mount prefix="front" topic="front/scan">
+      <origin xyz="${distance_between_axles + front_overhang} ${roadroller_width/2} 0.8" rpy="0 0 ${PI/4}" />
+    </xacro:sick_lms1xx_mount>
+  </xacro:if>
+
+  <!-- If enabled, generate the rear SICK LMS111 LASER payload. -->
+  <xacro:if value="$(optenv ROADROLLER_REAR_SICK_LASER 0)">
+    <xacro:sick_lms1xx_mount prefix="rear" topic="rear/scan">
+      <origin xyz="-${rear_overhang} -${roadroller_width/2} 0.8" rpy="0 0 ${PI + PI/4}" />
+    </xacro:sick_lms1xx_mount>
+  </xacro:if>
+
+  <xacro:if value="$(optenv ROADROLLER_FRONT_VELODYNE_HDL_32 0)"> 
+    <xacro:HDL-32E parent="base_link" name="front_velodyne" topic="velodyne_front_points2" hz="2" samples="220">
+      <origin xyz="${roadroller_length-rear_overhang} 0 ${wheel_radius+0.85}" rpy="0 0 0" />
+    </xacro:HDL-32E>
+  </xacro:if>
+
+  <xacro:if value="$(optenv ROADROLLER_REAR_VELODYNE_HDL_32 0)"> 
+    <xacro:HDL-32E parent="base_link" name="rear_velodyne" topic="velodyne_rear_points2" hz="2" samples="220">      
+      <origin xyz="${-rear_overhang + 0.15} 0 ${wheel_radius+1.32}" rpy="0 0 ${PI}" />
+    </xacro:HDL-32E>
+  </xacro:if>
+
+  <xacro:if value="$(optenv ROADROLLER_TOP_VELODYNE_HDL_32 0)"> 
+    <xacro:HDL-32E parent="base_link" name="top_velodyne" topic="velodyne_points2" hz="2" samples="220">
+      <origin xyz="${distance_between_axles/2 + 0.28} 0 2.85" rpy="0 0 0" />
+    </xacro:HDL-32E>
+  </xacro:if>
+
+  <xacro:if value="$(optenv ROADROLLER_TOP_VELODYNE_VLP_16 0)"> 
+    <xacro:VLP-16 parent="base_link" name="velodyne" topic="velodyne_points" hz="2" samples="440">
+      <origin xyz="${distance_between_axles/2 + 0.28} 0 2.85" rpy="0 0 0" />
+    </xacro:VLP-16>
+  </xacro:if>
+
+  <xacro:if value="$(optenv ROADROLLER_FRONT_RIGHT_BPEARL_32 0)"> 
+    <xacro:RS_Bpearl parent="base_link" name="front_bpearl" topic="front_bpearl_points" hz="2" samples="440">
+      <origin xyz="5.4 -1.25 2.85" rpy="${PI} 0 0" />
+    </xacro:RS_Bpearl>
+  </xacro:if>
+
+  <xacro:if value="$(optenv ROADROLLER_REAR_LEFT_BPEARL_32 0)"> 
+    <xacro:RS_Bpearl parent="base_link" name="rear_bpearl" topic="rear_bpearl_points" hz="2" samples="440">
+      <origin xyz="-1.16 1.25 2.85" rpy="${PI} 0 0" />
+    </xacro:RS_Bpearl>
+  </xacro:if>
+
+  <!-- If enabled, generate the optional Microstrain 3DM-GX2/3 IMU payload. -->
+  <xacro:include filename="$(find truck_description)/urdf/accessories/microstrain_imu.urdf.xacro" />
+  <xacro:if value="$(optenv ROADROLLER_MICROSTRAIN_IMU 0)">
+    <xacro:microstrain_imu prefix="$(optenv ROADROLLER_MICROSTRAIN_IMU_PREFIX upgraded)"
+                           mount_link="$(optenv ROADROLLER_MICROSTRAIN_IMU_MOUNT mid)_mount" >
+      <origin xyz="$(optenv ROADROLLER_MICROSTRAIN_IMU_OFFSET 1.8 0 2.7)"
+              rpy="$(optenv ROADROLLER_MICROSTRAIN_IMU_RPY 0 0 0)" />
+    </xacro:microstrain_imu>
+  </xacro:if>
+
+  <!-- If enabled, generate gps link-->
+  <xacro:include filename="$(find truck_description)/urdf/accessories/gps_mount.urdf.xacro"/>
+  <xacro:if value="$(optenv ROADROLLER_GPS 0)">
+    <xacro:gps_mount parent="base_link" prefix="$(optenv ROADROLLER_GPS_PREFIX)">
+      <origin xyz="$(optenv ROADROLLER_GPS_OFFSET 2 0 2.7)"
+              rpy="$(optenv ROADROLLER_GPS_RPY 0 0 0)" />
+    </xacro:gps_mount>
+  </xacro:if>
+
+  <!-- roadroller lidar supporting poles-->
+
+   <xacro:if value="$(optenv ROADROLLER 0)">
+      <joint name="front_pole_joint" type="fixed"> 
+          <!-- <origin xyz="${distance_between_axles/2} 0 ${wheel_radius}" rpy="0 0 0"/> -->
+          <origin xyz="5.2 -1.25 1.1" rpy="0 0 0"/>
+          <parent link="base_link"/>
+          <child link="front_pole"/>
+      </joint>
+
+      <link name="front_pole">
+          <inertial>
+            <mass value="0.001"/>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+          </inertial>
+
+          <visual>
+            <origin rpy="0 0 0" xyz="0 0 1"/>
+            <geometry>
+              <box size="0.1 0.05 1.55"/>
+            </geometry>
+          </visual>
+
+          <collision>
+            <origin rpy="0 0 0" xyz="0 0 1"/>
+            <geometry>
+              <box size="0.1 0.05 1.55"/>
+            </geometry>
+          </collision>
+      </link>
+
+      <joint name="rear_pole_joint" type="fixed"> 
+          <!-- <origin xyz="${distance_between_axles/2} 0 ${wheel_radius}" rpy="0 0 0"/> -->
+          <origin xyz="-0.96 1.25 1.1" rpy="0 0 0"/>
+          <parent link="base_link"/>
+          <child link="rear_pole"/>
+      </joint>
+
+      <link name="rear_pole">
+          <inertial>
+            <mass value="0.001"/>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+          </inertial>
+
+          <visual>
+            <origin rpy="0 0 0" xyz="0 0 1"/>
+            <geometry>
+              <box size="0.1 0.05 1.55"/>
+            </geometry>
+          </visual>
+
+          <collision>
+            <origin rpy="0 0 0" xyz="0 0 1"/>
+            <geometry>
+              <box size="0.1 0.05 1.55"/>
+            </geometry>
+          </collision>
+      </link>
+
+      <joint name="front_pole_2_joint" type="fixed"> 
+          <!-- <origin xyz="${distance_between_axles/2} 0 ${wheel_radius}" rpy="0 0 0"/> -->
+          <origin xyz="5.4 -1.25 2.85" rpy="0 0 0"/>
+          <parent link="base_link"/>
+          <child link="front_pole_2"/>
+      </joint>
+
+      <link name="front_pole_2">
+          <inertial>
+            <mass value="0.001"/>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+          </inertial>
+
+        <visual>
+            <origin rpy="0 0 0" xyz="-0.1 0 0.01"/>
+            <geometry>
+              <box size="0.3 0.1 0.02"/>
+            </geometry>
+          </visual>
+
+          <collision>
+            <origin rpy="0 0 0" xyz="-0.1 0 0.01"/>
+            <geometry>
+              <box size="0.3 0.1 0.02"/>
+            </geometry>
+          </collision>
+      </link>
+
+      <joint name="rear_pole_2_joint" type="fixed"> 
+          <!-- <origin xyz="${distance_between_axles/2} 0 ${wheel_radius}" rpy="0 0 0"/> -->
+          <origin xyz="-1.16 1.25 2.85" rpy="0 0 0"/>
+          <parent link="base_link"/>
+          <child link="rear_pole_2"/>
+      </joint>
+
+      <link name="rear_pole_2">
+          <inertial>
+            <mass value="0.001"/>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+          </inertial>
+
+          <visual>
+            <origin rpy="0 0 0" xyz="0.1 0 0.01"/>
+            <geometry>
+              <box size="0.3 0.1 0.02"/>
+            </geometry>
+          </visual>
+
+          <collision>
+            <origin rpy="0 0 0" xyz="0.1 0 0.01"/>
+            <geometry>
+              <box size="0.3 0.1 0.02"/>
+            </geometry>
+          </collision>
+      </link>
+  </xacro:if>
+  <!-- rear part of the paver-->
+
+  <xacro:if value="$(optenv PAVER 0)">
+  <joint name="rear_part_joint" type="fixed"> 
+      <!-- <origin xyz="${distance_between_axles/2} 0 ${wheel_radius}" rpy="0 0 0"/> -->
+      <origin xyz="-1.16 0 0.3" rpy="0 0 0"/>
+      <parent link="base_link"/>
+      <child link="rear_part"/>
+  </joint>
+
+  <link name="rear_part">
+      <inertial>
+        <mass value="0.001"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+      </inertial>
+
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <box size="0.5 7 0.2"/>
+        </geometry>
+      </visual>
+
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0.4"/>
+        <geometry>
+          <box size="0.5 7 0.8"/>
+        </geometry>
+      </collision>
+  </link>
+
+  <joint name="rear_part_2_joint" type="fixed"> 
+      <!-- <origin xyz="${distance_between_axles/2} 0 ${wheel_radius}" rpy="0 0 0"/> -->
+      <origin xyz="-1.16 0 0.3" rpy="0 0 0"/>
+      <parent link="base_link"/>
+      <child link="rear_part_2"/>
+  </joint>
+
+  <link name="rear_part_2">
+      <inertial>
+        <mass value="0.001"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+      </inertial>
+
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 1"/>
+        <geometry>
+          <box size="0.6 2.5 1.7"/>
+        </geometry>
+      </visual>
+
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 1"/>
+        <geometry>
+          <box size="0.6 2.5 1.7"/>
+        </geometry>
+      </collision>
+  </link>
+
+  </xacro:if>
+</robot>

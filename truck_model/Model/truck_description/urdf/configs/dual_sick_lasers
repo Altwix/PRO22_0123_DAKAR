@@ -1,0 +1,6 @@
+# The dual_laser configuration of roadroller with
+# the optional SICK LMS100 series LIDAR on the
+# front and rear.
+
+ROADROLLER_FRONT_SICK_LASER=1
+ROADROLLER_REAR_SICK_LASER=1

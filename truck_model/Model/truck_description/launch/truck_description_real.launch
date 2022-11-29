@@ -1,0 +1,12 @@
+<launch>
+
+  <arg name="namespace" default="truck"/>
+
+    <param name="robot_description"
+           command="xacro $(find truck_description)/urdf/truck_real.urdf"/>
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+      <param name="tf_prefix" value="$(arg namespace)"/> 
+    </node>
+
+</launch>
